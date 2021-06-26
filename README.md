@@ -215,6 +215,14 @@ java -jar trimmomatic-0.39.jar PE -phred33 -threads 8 ERR1224553_1.fastq.gz  ERR
 > 检索关键字：测序数据质量控制之FastQC
 > 原创 梅零落 生信菜鸟团 2017-10-23
 
+其实呢,如果直接在浏览器里面复制粘贴的微信公众号文章的链接很长,这种链接会6小时后失效:
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626222949.png)
+> https://mp.weixin.qq.com/s?src=11&timestamp=1624717678&ver=3154&signature=1k3uNtV32uM5rtB9Y2bY4gIrFny1SsAI6tv7OBr72pRVo2zn2pjouyWr1C8pp9u80spNfZceYagnAzBeya8G7BKRs8zv0t6kJY97gCAc0Tlx3PXRMbTh4Dne8tqRSFRD&new=1
+> 
+但是你把这个链接发送到微信里,然后客户端点开后,再复制链接,就得到了一个很短的此微信公众号的链接,就不会失效啦!
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626223155.png)
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626223202.png)
+> https://mp.weixin.qq.com/s/25wzafFuGUfMeR00awRFkg
 ## 01 建立索引
 ### 小麦参考基因组和注释文件gtf的下载教程:
 ① 点开embl的网址: http://ensemblgenomes.org/
