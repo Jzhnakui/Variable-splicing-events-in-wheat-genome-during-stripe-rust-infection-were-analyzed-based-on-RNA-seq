@@ -214,6 +214,114 @@ java -jar trimmomatic-0.39.jar PE -phred33 -threads 8 ERR1224553_1.fastq.gz  ERR
 > 检索关键字：测序数据质量控制之FastQC
 > 原创 梅零落 生信菜鸟团 2017-10-23
 
+## 01 建立索引
+### 小麦参考基因组和注释文件gtf的下载教程:
+① 点开embl的网址: http://ensemblgenomes.org/
+看到这个图没,这里是植物的,第一个Triticum aestivum就是小麦的基因组(小麦的基因组很大,2018年才公布)
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626205110.png)
+
+② 点一下上图中的Triticum aestivum之后,相当于点开了这个网址: https://plants.ensembl.org/Triticum_aestivum/Info/Index 
+往下看下,找到download(或者网页检索download)之后,对就是这个
+> <img src="https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626221403.png" style="zoom: 50%;" />
+
+③ 然后点一下,就会直接跳转下载了,正常就会是你的浏览器开始下载,那么你下载的这个肯定是.gz后缀的压缩文件,但是仅仅压缩文件,也有4个G了,解压之后更是有13G,再考虑到网络环境,很难下载成功:
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626205853.png)
+
+那怎么办呢?别急,咱们先看下网址类型,点击Download DNA sequence (FASTA)之后呢,会跳转到这个网址:
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626210240.png)
+> **ftp://ftp.ensemblgenomes.org/pub/plants/pre/fasta/triticum_aestivum/dna/**
+
+可以看到这个开头是ftp,这时候又要甩出一个很好的教程,b站王通老师的:
+> 如何下载生物数据_哔哩哔哩_bilibili
+> https://www.bilibili.com/video/BV1F4411B7fj?from=search&seid=10963334158296167899
+
+里面会具体讲到ftp下载的知识,数据下载都要费一节课来讲解,说明这第一步走起来并不那么容易.
+
+最后我折腾了好多,推荐你用Filezila下载,很丝滑快速!
+1. Filezila在连接服务器进行文件传输的时候很常用,非常好的一个开源软件.
+2. embl他也是一个服务器呀,那我连接之后应该也能下载! 是的,可以,很丝滑.
+
+④ 其实呢,你自己的电脑也可以与embl网站进行ftp的连接,我第一次在个人资源管理器里直接进到embl文件目录的时候,惊呆了,哈哈哈哈:
+1. windows下(主要我没用过mac,也不知道行不行),任意点开一个文件夹
+2. 将下载链接直接粘贴进地址栏里,然后直接回车
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626211210.png)
+
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626211230.png)
+
+是的,这时候想要什么就可以直接右键,然后选择复制到文件夹. 但是我当时试的时候太慢了,我就没用这种方式. 
+还是用的Filezila:
+下载安装好Filezila之后,直接在 主机 处的地址栏将下载链接输入后,连接就好了!
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626211625.png)
+
+可以看到列出了目录和文件,先要的话,双击就能下载了!下面这个截图里面是2M的速度,这已经很慢了,因为我连接的手机热点,平时的话,会更快,而且Filezila还很稳定!
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626211814.png)
+
+GTF文件`gunzip Triticum_aestivum.IWGSC.44.gtf.gz`和dna文件都在一起,顺便下载就行了.
+可以看到,我都是下载到自己电脑上了,那么怎么在服务器上用呢? 对,用Filezila再传到服务器上,因为想用服务器下载的话,有很多骚操作,然后由于网络问题,根本操作不起来,被迫周转一下!
+### 建立索引
+
+先两个教程,别害怕,不是很长:
+
+1. 下建明老师的转录组的课,现在才安利,是因为建明老师的课一般对小白不是很友好,他演示了一遍hisat2的流程,这个连接是第十集:
+
+> 【生信技能树】转录组测序数据分析_哔哩哔哩_bilibili
+> https://www.bilibili.com/video/BV12s41137HY?p=10
+
+2. 徐周更老师的视频,他是再windows系统下的linux虚拟机搞的,练手可以,对于小麦这么庞大的基因组,会占用很多很多内存,别想着能再个人电脑上的linux子系统建立成功了! 但是可以学个流程:
+
+> 学转录组入门生信」如何为RNA-seq分析建立HISAT2索引_哔哩哔哩 (゜-゜)つロ 干杯~-bilibili: https://www.bilibili.com/video/BV1mt411J7v8?from=search&seid=5379635453619409581
+
+#### 我就没必要放自己的全部命令了
+
+具体的hisat2的运行代码,本来想放自己的代码的,但是后来觉得没必要,我每个运行命令都含有一些路径,这些路径你要换成你自己的,才能运行,所以,反正你要想复制粘贴别人的命令,再改成你自己的路径,保证软件的正确运行,那我还不如直接把我参照的内份教程给你(肯定能跑通!).  我会更关注,详尽地描述我运行中踩到的一些坑,这样会对你更有帮助.  
+
+我的简单的一些代码:
+```linux
+gunzip Triticum_aestivum.IWGSC.dna.toplevel.fa.gz #参考基因组来自于ensembl,解压一下.
+gunzip Triticum_aestivum.IWGSC.44.gtf.gz #注释文件同样来自于ensembl,注释文件也要下载然后解压
+source activate rna #启动rna环境. 
+```
+
+你可能会有个疑问,上面代码中的`source activate rna`是什么意思呢? 
+
+举个例子吧: 毕业答辩会穿正装和皮鞋,在家里喜欢澡的时候不穿衣服,但是会穿拖鞋,哈哈. 那现在设想一个场景,你光着身子和穿着拖鞋答辩肯定不行,对吧! 回到服务器或者计算机中的环境上来说,不同的软件就对应不同的事情,比如答辩还是洗澡; 而拖鞋和皮鞋就是环境. 
+
+拖鞋和洗澡对应,那么为某一个或者某一类软件创建一个独立的运行环境,就不会污染其他的软件运行,有时候你甚至要为某一个软件,创建一个独立的环境. 
+我推荐你最好看下这个课,上面已经安利过了,要是没看的话,真的要看一下!很重要!
+
+> 「生信技能树」2021公益课(linux基础 & conda)_哔哩哔哩_bilibili
+> https://www.bilibili.com/video/BV1Yy4y117SX
+
+这个启动rna环境是,其实就是我为转录组(rna)创建的独立的环境,这个环境运行这个转录组的项目,其他的单细胞测序运行的东西,就不要和这个rna环境有染. 目前我也算是一个入了门的小菜鸡了,目前来说,我一天甚至一上午,就可以跑完我毕设的全部流程,而实际的服务器运算时间更短,可能全部加起来也就十几分钟,我更多的时间消耗在了运行环境的管理上,依赖包,库的处理解决上. 所以环境中软件版本的管理非常重要!
+
+#### 代码复制教程链接:
+
+> 软件介绍之Hisat2 :https://mp.weixin.qq.com/s/5TtH1bDw8Q6q2ZvkczfBYQ
+> 原创 生信技能树 生信技能树 6月11日 
+
+#### 我刚用hisat建立索引就遇到坑了!
+首先再hisat2建立索引的时候,会生成一些中间文件,有的很大很大,我跑的时候,有个中间文件达到了将近400G;
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626220858.png)
+
+这没什么,主要是最后总会建立索引失败,那我是怎么发现失败了呢? 我屁颠屁颠地拿着我建立地索引去进行下一步比对地时候,一直一直是错的! 小脑瓜敏锐地感觉到,肯定是哪里不对劲! 但是,这个世界这么大,绝对有人和我遇到了一样的问题,我就Google以及百度呀啥的,各种查. 最后明白过来,是因为内存不够. 其实我刚开始不知道看hisat2输出的log信息,人家hisat2已经告诉你了,内存用尽,运行终止.... 当时还是小白,连个log都不. 高手的话,基本上都是通过各种log信息判断的!
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626220916.png)
+
+还有一些国内外的朋友也踩坑了,这几个踩坑贴也可以看下,哈哈哈:
+> 小麦RNA-seq利用hisat2构建index过程 - 简书
+> https://www.jianshu.com/p/426b5fefe1a5
+> ![](https://haoran9982.oss-cn-beijing.aliyuncs.com/img/20210626220400.png)
+
+> hisat2-build indexing produces more than 8 output files
+> https://www.biostars.org/p/288498/
+
+最后呢,我用一个400G内存的服务器跑成功了索引,所以我的到的这个hisat2建立的索引你也是能用的,这是百度云下载链接,这样你就不用自己建立了!
+
+#### hisat2 2.2.1建立的小麦基因组索引文件大放送!
+
+但是,我这是hisat2 2.2.1版本建的索引,所以你想要用我的这个索引接着用hisat软件进行比对,那你的hisat2 软件必须也要是2.2.1版本,2.2.0版本不可以!
+链接:
+
+> 链接连接连接!
 ## 不比对直接用salmon得到表达量
 
 用salmon软件进行表达量的计算。
